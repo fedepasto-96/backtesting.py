@@ -1133,6 +1133,7 @@ class Backtest:
         )
         self._strategy = strategy
         self._results: Optional[pd.Series] = None
+        self._closed_remaining_trades: bool = False  # Initialize the flag
 
     def run(self, **kwargs) -> pd.Series:
         """
@@ -1222,6 +1223,9 @@ class Backtest:
                 for trade in broker.trades:
                     trade.close()
 
+                # Set the flag to True when closing remaining trades
+                self._closed_remaining_trades = True
+
                 # Re-run broker one last time to handle orders placed in the last strategy
                 # iteration. Use the same OHLC values as in the last broker iteration.
                 if start < len(self._data):
@@ -1241,6 +1245,7 @@ class Backtest:
             )
 
         return self._results
+
 
     def optimize(self, *,
                  maximize: Union[str, Callable[[pd.Series], float]] = 'SQN',
